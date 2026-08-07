@@ -1,0 +1,11 @@
+.gradle/
+.idea/
+.android-sdk/
+.android-sdk-unpack/
+.android-sdk-download.zip
+build/
+app/build/
+local.properties
+*.iml
+*.jks
+*.keystore
