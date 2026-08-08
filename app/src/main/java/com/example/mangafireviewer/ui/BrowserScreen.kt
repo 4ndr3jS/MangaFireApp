@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +67,7 @@ fun BrowserScreen(controller: MangaFireWebViewController) {
                 FailurePanel(
                     failure = failure,
                     onRetry = controller::reload,
+                    onGoHome = controller::loadHome,
                     onOpenExternally = controller::openExternally,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -80,6 +80,7 @@ fun BrowserScreen(controller: MangaFireWebViewController) {
 private fun FailurePanel(
     failure: BrowserFailure,
     onRetry: () -> Unit,
+    onGoHome: () -> Unit,
     onOpenExternally: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -94,9 +95,6 @@ private fun FailurePanel(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(bottom = 24.dp),
-            )
             Text(
                 text = failure.title,
                 style = MaterialTheme.typography.headlineSmall,
@@ -113,6 +111,12 @@ private fun FailurePanel(
                 modifier = Modifier.padding(top = 24.dp),
             ) {
                 Text(stringResource(R.string.action_retry))
+            }
+            OutlinedButton(
+                onClick = onGoHome,
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text(stringResource(R.string.action_home))
             }
             OutlinedButton(
                 onClick = onOpenExternally,
