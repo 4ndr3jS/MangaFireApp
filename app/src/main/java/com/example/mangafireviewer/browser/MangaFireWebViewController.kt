@@ -79,6 +79,18 @@ class MangaFireWebViewController(
         webView.loadUrl(MANGAFIRE_HOME_URL)
     }
 
+    fun loadAppLink(rawUrl: String): Boolean {
+        val trustedUrl = AppLinkPolicy.resolve(rawUrl)
+        if (trustedUrl == null) {
+            notifyUser("Only secure MangaFire links can open in this app.")
+            return false
+        }
+
+        clearFailure()
+        webView.loadUrl(trustedUrl)
+        return true
+    }
+
     fun goBack(): Boolean {
         if (!webView.canGoBack()) return false
         clearFailure()

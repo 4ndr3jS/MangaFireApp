@@ -17,6 +17,10 @@ adb install -r .\app\build\outputs\apk\debug\app-debug.apk
 ## Behavior
 
 - Exact-host HTTPS navigation to `mangafire.to` stays in the WebView.
+- MangaFire HTTPS links from browsers, messages, and other apps can open
+  directly in the installed app after the user selects it as the handler.
+- Incoming links are revalidated in-app; cleartext URLs, lookalike hosts,
+  credentials, and non-standard ports remain blocked even for explicit intents.
 - Secure CDN chapter images load as ordinary subresources.
 - User-initiated external HTTPS links open outside the trusted WebView.
 - Popups, downloads, insecure URLs, custom schemes, file access, uploads,

@@ -35,11 +35,26 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Let users route MangaFire links into the installed app. This
+                 is intentionally not auto-verified because the app does not
+                 control mangafire.to's Digital Asset Links configuration. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="mangafire.to"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
     </application>
