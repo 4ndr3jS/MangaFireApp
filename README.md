@@ -16,6 +16,8 @@ adb install -r .\app\build\outputs\apk\debug\app-debug.apk
 
 ## Behavior
 
+- The launcher uses MangaFire's official blue flame mark with adaptive round
+  and shaped icon support.
 - Exact-host HTTPS navigation to `mangafire.to` stays in the WebView.
 - MangaFire HTTPS links from browsers, messages, and other apps can open
   directly in the installed app after the user selects it as the handler.
