@@ -7,6 +7,7 @@ data class BrowserUiState(
     val title: String = "MangaFire",
     val progress: Int = 0,
     val canGoBack: Boolean = false,
+    val isReaderPage: Boolean = false,
     val isFullscreen: Boolean = false,
     val failure: BrowserFailure? = null,
 )

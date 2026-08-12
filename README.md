@@ -29,6 +29,9 @@ adb install -r .\app\build\outputs\apk\debug\app-debug.apk
   preferences, reading progress, and reader.
 - Android Back exits reader fullscreen first, then navigates WebView history.
 - Fullscreen reader mode rotates to landscape and returns to portrait on exit.
+- The display stays awake while a validated MangaFire chapter-reader page is
+  open, including across reader fullscreen transitions. The wake request is
+  released on catalog/account pages, failed loads, and app teardown.
 - Clear browsing data removes cookies, site storage, cache, and WebView history.
 
 The remote site and CDN can change independently, so live reading remains a

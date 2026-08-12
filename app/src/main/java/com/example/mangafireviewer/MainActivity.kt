@@ -20,6 +20,7 @@ import androidx.core.view.isNotEmpty
 import com.example.mangafireviewer.browser.FullscreenDelegate
 import com.example.mangafireviewer.browser.MangaFireWebViewController
 import com.example.mangafireviewer.browser.AppLinkPolicy
+import com.example.mangafireviewer.browser.ScreenAwakePolicy
 import com.example.mangafireviewer.ui.BrowserScreen
 import com.example.mangafireviewer.ui.MangaFireViewerTheme
 
@@ -28,6 +29,8 @@ class MainActivity : ComponentActivity(), FullscreenDelegate {
     private lateinit var composeView: ComposeView
     private lateinit var fullscreenContainer: FrameLayout
     private var lastHandledAppLink: String? = null
+    private var readerRequestsScreenAwake = false
+    private var fullscreenRequestsScreenAwake = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,7 +161,8 @@ class MainActivity : ComponentActivity(), FullscreenDelegate {
         )
         composeView.visibility = View.GONE
         fullscreenContainer.visibility = View.VISIBLE
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        fullscreenRequestsScreenAwake = true
+        updateKeepScreenOnFlag()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         hideSystemBars()
     }
@@ -167,7 +171,8 @@ class MainActivity : ComponentActivity(), FullscreenDelegate {
         fullscreenContainer.removeAllViews()
         fullscreenContainer.visibility = View.GONE
         composeView.visibility = View.VISIBLE
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        fullscreenRequestsScreenAwake = false
+        updateKeepScreenOnFlag()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         showSystemBars()
     }
@@ -190,6 +195,23 @@ class MainActivity : ComponentActivity(), FullscreenDelegate {
     private fun showSystemBars() {
         WindowCompat.getInsetsController(window, window.decorView)
             .show(WindowInsetsCompat.Type.systemBars())
+    }
+
+    override fun setReaderScreenAwake(enabled: Boolean) {
+        readerRequestsScreenAwake = enabled
+        updateKeepScreenOnFlag()
+    }
+
+    private fun updateKeepScreenOnFlag() {
+        val keepScreenOn = ScreenAwakePolicy.shouldKeepScreenAwake(
+            isReaderPage = readerRequestsScreenAwake,
+            isFullscreen = fullscreenRequestsScreenAwake,
+        )
+        if (keepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     private fun handleAppLink(

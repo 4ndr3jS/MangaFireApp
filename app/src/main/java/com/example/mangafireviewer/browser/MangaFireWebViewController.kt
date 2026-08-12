@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.update
 interface FullscreenDelegate {
     fun showFullscreenView(view: View)
     fun hideFullscreenView()
+    fun setReaderScreenAwake(enabled: Boolean)
 }
 
 class MangaFireWebViewController(
@@ -156,6 +157,7 @@ class MangaFireWebViewController(
     }
 
     fun destroy() {
+        updateReaderMode(false)
         chromeClient.exitFullscreen()
         webView.stopLoading()
         webView.removeAllViews()
@@ -168,6 +170,14 @@ class MangaFireWebViewController(
 
     private fun notifyUser(message: String) {
         _messages.tryEmit(message)
+    }
+
+    private fun updateReaderMode(isReaderPage: Boolean) {
+        val changed = _uiState.value.isReaderPage != isReaderPage
+        if (changed) {
+            _uiState.update { it.copy(isReaderPage = isReaderPage) }
+            fullscreenDelegate.setReaderScreenAwake(isReaderPage)
+        }
     }
 
     private fun openExternalUri(uri: Uri) {
@@ -211,20 +221,23 @@ class MangaFireWebViewController(
     }
 
     private fun updateHistoryState(view: WebView) {
+        val trustedUrl = view.url?.takeIf { url ->
+            NavigationPolicy.classifyRaw(
+                rawUrl = url,
+                isMainFrame = true,
+                hasUserGesture = false,
+            ) == NavigationDecision.AllowInternal
+        }
+        val isReaderPage = ReaderPagePolicy.isReaderPage(trustedUrl)
+
         _uiState.update { state ->
             state.copy(
-                currentUrl = view.url
-                    ?.takeIf { url ->
-                        NavigationPolicy.classifyRaw(
-                            rawUrl = url,
-                            isMainFrame = true,
-                            hasUserGesture = false,
-                        ) == NavigationDecision.AllowInternal
-                    }
-                    ?: state.currentUrl,
+                currentUrl = trustedUrl ?: state.currentUrl,
                 canGoBack = view.canGoBack(),
+                isReaderPage = isReaderPage,
             )
         }
+        fullscreenDelegate.setReaderScreenAwake(isReaderPage)
     }
 
     private inner class SecureWebViewClient : WebViewClient() {
@@ -283,6 +296,7 @@ class MangaFireWebViewController(
             error: WebResourceError,
         ) {
             if (!request.isForMainFrame) return
+            updateReaderMode(false)
             Log.w(LOG_TAG, "main_frame_load_failed category=network code=${error.errorCode}")
             _uiState.update {
                 it.copy(
@@ -301,6 +315,7 @@ class MangaFireWebViewController(
             errorResponse: WebResourceResponse,
         ) {
             if (!request.isForMainFrame) return
+            updateReaderMode(false)
             Log.w(
                 LOG_TAG,
                 "main_frame_load_failed category=http status=${errorResponse.statusCode}",
@@ -322,6 +337,7 @@ class MangaFireWebViewController(
             error: SslError,
         ) {
             handler.cancel()
+            updateReaderMode(false)
             Log.w(LOG_TAG, "main_frame_load_failed category=tls")
             _uiState.update {
                 it.copy(
@@ -344,6 +360,7 @@ class MangaFireWebViewController(
             callback.backToSafety(true)
             Log.w(LOG_TAG, "main_frame_load_failed category=safe_browsing")
             if (request.isForMainFrame) {
+                updateReaderMode(false)
                 _uiState.update {
                     it.copy(
                         failure = BrowserFailure(
