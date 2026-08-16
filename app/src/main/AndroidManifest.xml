@@ -46,7 +46,7 @@
             <!-- Let users route MangaFire links into the installed app. This
                  is intentionally not auto-verified because the app does not
                  control mangafire.to's Digital Asset Links configuration. -->
-            <intent-filter>
+            <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />

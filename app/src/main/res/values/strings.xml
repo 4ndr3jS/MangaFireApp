@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MangaFire</string>
-    <string name="action_back">Back</string>
     <string name="action_home">Home</string>
-    <string name="action_reload">Reload</string>
     <string name="action_open_external">Open externally</string>
-    <string name="action_clear_data">Clear browsing data</string>
+    <string name="action_forget_chapter">Forget saved chapter</string>
     <string name="action_retry">Retry</string>
-    <string name="action_cancel">Cancel</string>
-    <string name="clear_data_title">Clear browsing data?</string>
-    <string name="clear_data_message">This removes MangaFire cookies, login state, site storage, cache, and browsing history from this app.</string>
-    <string name="clear_data_confirm">Clear data</string>
+    <string name="continue_reading">Continue reading</string>
 </resources>

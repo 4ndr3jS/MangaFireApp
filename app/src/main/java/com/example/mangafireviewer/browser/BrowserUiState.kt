@@ -9,7 +9,14 @@ data class BrowserUiState(
     val canGoBack: Boolean = false,
     val isReaderPage: Boolean = false,
     val isFullscreen: Boolean = false,
+    val continueReading: LastReadChapter? = null,
     val failure: BrowserFailure? = null,
+)
+
+data class LastReadChapter(
+    val url: String,
+    val mangaTitle: String,
+    val chapter: String,
 )
 
 enum class BrowserFailureKind {

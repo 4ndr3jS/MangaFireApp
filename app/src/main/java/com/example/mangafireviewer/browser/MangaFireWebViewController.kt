@@ -46,7 +46,10 @@ class MangaFireWebViewController(
     private val activity: ComponentActivity,
     private val fullscreenDelegate: FullscreenDelegate,
 ) {
-    private val _uiState = MutableStateFlow(BrowserUiState())
+    private val lastReadStore = LastReadStore(activity.applicationContext)
+    private val _uiState = MutableStateFlow(
+        BrowserUiState(continueReading = lastReadStore.load()),
+    )
     val uiState = _uiState.asStateFlow()
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
@@ -78,6 +81,18 @@ class MangaFireWebViewController(
     fun loadHome() {
         clearFailure()
         webView.loadUrl(MANGAFIRE_HOME_URL)
+    }
+
+    fun continueReading() {
+        val chapter = _uiState.value.continueReading ?: return
+        clearFailure()
+        webView.loadUrl(chapter.url)
+    }
+
+    fun forgetSavedChapter() {
+        lastReadStore.clear()
+        _uiState.update { it.copy(continueReading = null) }
+        notifyUser("Saved chapter removed.")
     }
 
     fun loadAppLink(rawUrl: String): Boolean {
@@ -119,6 +134,8 @@ class MangaFireWebViewController(
     }
 
     fun clearBrowsingData(onComplete: () -> Unit = {}) {
+        lastReadStore.clear()
+        _uiState.update { it.copy(continueReading = null) }
         WebStorage.getInstance().deleteAllData()
         webView.clearCache(true)
         webView.clearFormData()
@@ -220,6 +237,17 @@ class MangaFireWebViewController(
         }
     }
 
+    private fun rememberChapter(view: WebView) {
+        val chapter = MangaFireChapterRoute.parse(
+            rawUrl = view.url ?: return,
+            pageTitle = view.title,
+        ) ?: return
+        if (_uiState.value.continueReading == chapter) return
+
+        lastReadStore.save(chapter)
+        _uiState.update { it.copy(continueReading = chapter) }
+    }
+
     private fun updateHistoryState(view: WebView) {
         val trustedUrl = view.url?.takeIf { url ->
             NavigationPolicy.classifyRaw(
@@ -279,6 +307,7 @@ class MangaFireWebViewController(
         override fun onPageFinished(view: WebView, url: String?) {
             _uiState.update { it.copy(progress = 100) }
             updateHistoryState(view)
+            rememberChapter(view)
             applyPageCustomizations(view)
         }
 
@@ -397,6 +426,7 @@ class MangaFireWebViewController(
                 ?.takeIf(String::isNotEmpty)
                 ?: "MangaFire"
             _uiState.update { it.copy(title = safeTitle) }
+            rememberChapter(view)
         }
 
         override fun onShowCustomView(
